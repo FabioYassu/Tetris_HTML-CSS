@@ -200,6 +200,9 @@ window.onload = () => {
             case "ArrowDown":
                 delay = Tetromino.DELAY / Tetromino.DELAY_INCREASED;
                 break;
+            case " ":
+                tetrominos.rotate();
+                break; 
         }
     }
 }
