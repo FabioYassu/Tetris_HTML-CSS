@@ -43,7 +43,7 @@ window.onload = () => {
                 this.img.onload = () => this.draw();
                 return;
             }
-            // Print the current tetromine
+            // mostrar o tetromine atual de forma aleatoria
             for (let i = 0; i < this.length; ++i) {
                 ctx.drawImage(
                     this.img,
@@ -73,7 +73,7 @@ window.onload = () => {
         rotate() {
             const
                 maxX = Math.max(...this.x),
-                minX = Math.min(...this.x),
+                minX = Math.min(...this.x),                
                 minY = Math.min(...this.y),
                 nx = [],
                 ny = [];
@@ -113,49 +113,49 @@ window.onload = () => {
 
 
 
-        (function setup() {
+    (function setup() {
 
-            canvas.style.top = Tetromino.BLOCK_SIZE;
-            canvas.style.left = Tetromino.BLOCK_SIZE;
-    
-            ctx.canvas.width = FIELD_WIDTH * Tetromino.BLOCK_SIZE;
-            ctx.canvas.height = FIELD_HEIGHT * Tetromino.BLOCK_SIZE;
-    
-            // Scale background
-            const scale = Tetromino.BLOCK_SIZE / 13.83333333333;
-            background.style.width = scale * 166;
-            background.style.height = scale * 304;
-    
-            // Offset each block to the middle of the table width
-            const middle = Math.floor(FIELD_WIDTH / 2);
-            for (const t of TETROMINOES) t.x = t.x.map(x => x + middle);
-    
-            reset();
-            draw();
-        })();
+        canvas.style.top = Tetromino.BLOCK_SIZE;
+        canvas.style.left = Tetromino.BLOCK_SIZE;
 
-        function reset() {
-            // Make false all blocks
-            FIELD.forEach((_, y) => FIELD[y] = Array.from({ length: FIELD_WIDTH }).map(_ => false));
-    
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-            delay = Tetromino.DELAY;
-            score = 0;
-            lines = 0;
-        }
+        ctx.canvas.width = FIELD_WIDTH * Tetromino.BLOCK_SIZE;
+        ctx.canvas.height = FIELD_HEIGHT * Tetromino.BLOCK_SIZE;
+
+        // Scale background
+        const scale = Tetromino.BLOCK_SIZE / 13.83333333333;
+        background.style.width = scale * 166;
+        background.style.height = scale * 304;
+
+        // Offset each block to the middle of the table width
+        const middle = Math.floor(FIELD_WIDTH / 2);
+        for (const t of TETROMINOES) t.x = t.x.map(x => x + middle);
+
+        reset();
+        draw();
+    })();
+
+    function reset() {
+        // Torna todos os blocos em false
+        FIELD.forEach((_, y) => FIELD[y] = Array.from({ length: FIELD_WIDTH }).map(_ => false));
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        delay = Tetromino.DELAY;
+        score = 0;
+        lines = 0;
+    }
 
     function draw() {
         if (tetrominos) {
 
-            // Collision?
+            // Colisão
             if (tetrominos.collides(i => ({ x: tetrominos.x[i], y: tetrominos.y[i] + 1 }))) 
             {
                 tetrominos.merge();
-                // Prepare for new tetromino
+                // Prepara a table para o novo tetromino
                 tetrominos = null;
 
-                // Check for completed rows
+                // Checa as linhas completas 
                 let completedRows = 0;
                 for (let y = FIELD_HEIGHT - 1; y >= MIN_VALID_ROW; --y)
                     if (FIELD[y].every(e => e !== false)) {
@@ -163,18 +163,26 @@ window.onload = () => {
                             FIELD[ay] = [...FIELD[ay - 1]];
 
                         ++completedRows;
-                        // Keep the same row
+                        // Mantem a linha
                         ++y;               
             }
 
             if (completedRows) {
-                //Print against the table
+                //Trava o tetromino na table
                 ctx.clearRect(0,0,canvas.width, canvas.height);
                 for (let y = MIN_VALID_ROW; y < FIELD_HEIGHT; ++y) {
                     for (let x = 0; x < FIELD_WIDTH; ++x) {
-
-                        //CONTINUAR 4:14 Min
+                        if (FIELD[y][x] !== false) new Tetromino([x], [y], FIELD[y][x]).draw();
                     }
+                }
+
+                score += [40,100,300,1200][completedRows-1];
+                lines += completedRows;
+            } else {
+                // Verifica Game Over
+                if (FIELD[MIN_VALID_ROW-1].some(block => block !== false )) {
+                    alert("GAME OVER!");
+                    reset();
                 }
             }
 
@@ -182,9 +190,7 @@ window.onload = () => {
 
             tetrominos.update(i => ++tetrominos.y[i]);
 
-        }
-        //No tetromino failing
-        else {
+            } else {
 
             lblScore.innerText = score;
             lblLines.innerText = lines;
@@ -203,7 +209,7 @@ window.onload = () => {
         setTimeout(draw, delay);
     }
 
-     // Move
+     // Movimentos
      window.onkeydown = event => {
         switch (event.key) {
             case "ArrowLeft":
@@ -217,7 +223,7 @@ window.onload = () => {
             case "ArrowDown":
                 delay = Tetromino.DELAY / Tetromino.DELAY_INCREASED;
                 break;
-            case " ":
+            case "ArrowUp":
                 tetrominos.rotate();
                 break;
         }
